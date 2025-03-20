@@ -1,0 +1,231 @@
+version: '3.8'
+
+services:
+  rmqnamesrv:
+    image: apache/rocketmq:latest
+    container_name: rmqnamesrv
+    ports:
+      - "9876:9876"
+    volumes:
+      - G:\docker\rcketmq\namesrv:/home/rocketmq/store
+      - G:\docker\rcketmq\namesrv\namesrv.properties:/home/rocketmq/conf/namesrv.properties
+    environment:
+      JAVA_OPTS_EXTRA: "-Xms512m -Xmx512m -Xmn256m"
+    command: sh -c "sh mqnamesrv -c /home/rocketmq/conf/namesrv.properties"
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  rmqbroker-a:
+    image: apache/rocketmq:latest
+    container_name: rmqbroker-a
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    volumes:
+      - G:\docker\rcketmq\broker-a:/home/rocketmq/store
+      - G:\docker\rcketmq\broker-a\broker.conf:/home/rocketmq/conf/broker.conf
+    command: sh -c "sh mqbroker -c /home/rocketmq/conf/broker.conf"
+    environment:
+      JAVA_OPTS_EXTRA: "-Xms512m -Xmx512m -Xmn512m"
+    depends_on:
+      - rmqnamesrv
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+
+  rmqbroker-b:
+    image: apache/rocketmq:latest
+    container_name: rmqbroker-b
+    ports:
+      - "10912:10909"
+      - "10913:10911"
+    volumes:
+      - G:\docker\rcketmq\broker-b:/home/rocketmq/store
+      - G:\docker\rcketmq\broker-b\broker.conf:/home/rocketmq/conf/broker.conf
+    command: sh -c "sh mqbroker -c /home/rocketmq/conf/broker.conf"
+    environment:
+      JAVA_OPTS_EXTRA: "-Xms512m -Xmx512m -Xmn256m"
+    depends_on:
+      - rmqnamesrv
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+
+  rmqbroker-c:
+    image: apache/rocketmq:latest
+    container_name: rmqbroker-c
+    ports:
+      - "10914:10909"
+      - "10915:10911"
+    volumes:
+      - G:\docker\rcketmq\broker-c:/home/rocketmq/store
+      - G:\docker\rcketmq\broker-c\broker.conf:/home/rocketmq/conf/broker.conf
+    command: sh -c "sh mqbroker -c /home/rocketmq/conf/broker.conf"
+    environment:
+      JAVA_OPTS_EXTRA: "-Xms512m -Xmx512m -Xmn256m"
+    depends_on:
+      - rmqnamesrv
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+
+  rocketmq-console:
+    image: styletang/rocketmq-console-ng:latest
+    container_name: rocketmq-console
+    ports:
+      - "7080:8080"
+    volumes:
+      - G:\docker\rcketmq\rocketmq-console\application.properties:/app/rocketmq-console-ng/application.properties
+    environment:
+      JAVA_OPTS: "-Drocketmq.namesrv.addr=rmqnamesrv:9876"
+    depends_on:
+      - rmqnamesrv
+      - rmqbroker-a
+      - rmqbroker-b
+      - rmqbroker-c
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - G:\docker\redis:/data
+    environment:
+      REDIS_PASSWORD: opendoor
+    command: redis-server --requirepass "$REDIS_PASSWORD"
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - G:\docker\mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: opendoor
+      MYSQL_DATABASE: biz01
+      MYSQL_USER: tangsx
+      MYSQL_PASSWORD: opendoor
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - G:\docker\nacos:/home/nacos/data
+    environment:
+      MYSQL_SERVICE_PORT: 3306
+      MYSQL_SERVICE_USER: root
+      NACOS_AUTH_TOKEN_SECRET_KEY: nacos@2025
+      MYSQL_SERVICE_PASSWORD: opendoor
+      MODE: standalone
+      NACOS_AUTH_TOKEN: SecretKey012345678901234567890123456789012345678901234567890123456789
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_DB_NAME: nacos
+      NACOS_AUTH_SYSTEM_TYPE: nacos
+      NACOS_AUTH_ENABLE: true
+      NACOS_AUTH_IDENTITY_KEY: nacos
+      SPRING_DATASOURCE_PLATFORM: mysql
+      NACOS_AUTH_IDENTITY_VALUE: nacos
+    depends_on:
+      - mysql
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - JVM_OPTIONS="-Xms4g -Xmx4g"
+    volumes:
+      - G:\docker\elasticsearch\data:/usr/share/elasticsearch/data
+    deploy:
+      resources:
+        limits:
+          memory: 8g
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.0
+    container_name: logstash
+    ports:
+      - "5044:5044"
+    volumes:
+      - G:\docker\logstash\pipeline:/usr/share/logstash/pipeline
+      - G:\docker\logstash\config:/usr/share/logstash/config
+      - G:\docker\logstash\logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - E:\code\cloud-demo-2025\logs:/usr/share/logstash/logs
+    depends_on:
+      - elasticsearch
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.0
+    container_name: filebeat
+    volumes:
+      - G:\docker\filebeat\filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - E:\code\cloud-demo-2025\logs:/usr/share/filebeat/logs
+    command: filebeat -e -strict.perms=false
+    depends_on:
+      - logstash
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - G:\nginx\conf\nginx.conf:/etc/nginx/nginx.conf
+      - G:\nginx\conf\conf.d:/etc/nginx/conf.d
+      - G:\nginx\html:/usr/share/nginx/html
+    deploy:
+      resources:
+        limits:
+          memory: 128m

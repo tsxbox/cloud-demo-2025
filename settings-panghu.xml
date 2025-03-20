@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <localRepository>E:\tools\repository</localRepository>
+
+    <mirrors>
+        <mirror>
+            <id>mirror</id>
+            <mirrorOf>central,jcenter,!repo-sxrxg</mirrorOf>
+            <name>mirror</name>
+            <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+        </mirror>
+    </mirrors>
+    <servers>
+        <server>
+            <id>repo-sxrxg</id>
+            <username>6744883a259532263f07f387</username>
+            <password>4Vg(LSDIfCxL</password>
+        </server>
+    </servers>
+    <profiles>
+        <profile>
+            <id>rdc</id>
+            <properties>
+                
+                <altReleaseDeploymentRepository>
+                    repo-sxrxg::default::https://packages.aliyun.com/67448853894777dc14f9610f/maven/repo-sxrxg
+                </altReleaseDeploymentRepository>
+                
+                
+                <altSnapshotDeploymentRepository>
+                    repo-sxrxg::default::https://packages.aliyun.com/67448853894777dc14f9610f/maven/repo-sxrxg
+                </altSnapshotDeploymentRepository>
+                
+            </properties>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>snapshots</id>
+                    <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>repo-sxrxg</id>
+                    <url>https://packages.aliyun.com/67448853894777dc14f9610f/maven/repo-sxrxg</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>central</id>
+                    <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>snapshots</id>
+                    <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+                <pluginRepository>
+                    <id>repo-sxrxg</id>
+                    <url>https://packages.aliyun.com/67448853894777dc14f9610f/maven/repo-sxrxg</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>rdc</activeProfile>
+    </activeProfiles>
+</settings>

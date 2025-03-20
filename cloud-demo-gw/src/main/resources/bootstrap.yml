@@ -1,0 +1,38 @@
+server:
+  port: 9900
+
+spring:
+  application:
+    name: cloud-demo-gw
+
+  config:
+    import:
+      - nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}?refreshEnabled=true
+      - nacos:redis-client.${spring.cloud.nacos.config.file-extension}?refreshEnabled=true
+  cloud:
+    nacos:
+      discovery:
+        username: nacos
+        password: nacos
+        server-addr: localhost:8848
+        group: DEFAULT_GROUP
+        namespace: public
+      config:
+        username: nacos
+        password: nacos
+        server-addr: localhost:8848
+        group: DEFAULT_GROUP
+        namespace: public
+        file-extension: yml
+    gateway:
+      routes:
+        - id: cloud-demo-01
+          uri: lb://cloud-demo-01
+          predicates:
+            - Path=/app01/**
+        - id: cloud-demo-02
+          uri: lb://cloud-demo-02
+          predicates:
+            - Path=/app02/**
+          filters:
+            - name: TraceIdFilter

@@ -1,0 +1,6 @@
+# Project exclude paths
+/cloud-demo-001/cloud-demo-001-api/target/
+/cloud-demo-001/cloud-demo-001-web/target/
+/cloud-demo-002/cloud-demo-002-web/target/
+/cloud-demo-002/target/
+/cloud-demo-gw/target/
